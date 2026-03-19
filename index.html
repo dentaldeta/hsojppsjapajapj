@@ -1,12 +1,848 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>はじめてのページ</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>歯科医院開業｜手取り収入シミュレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a2540;
+  --blue: #3b82f6;
+  --indigo: #6366f1;
+  --violet: #8b5cf6;
+  --orange: #ea580c;
+  --amber: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --slate: #64748b;
+  --light: #f7f9fc;
+  --border: #e2e8f0;
+  --shadow: 0 1px 4px rgba(26,37,64,.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  background: var(--light);
+  color: var(--navy);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Header ─── */
+header {
+  background: var(--navy);
+  padding: 28px 20px 22px;
+  text-align: center;
+}
+.h-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.1);
+  color: #a5b4fc;
+  font-size: 10px;
+  letter-spacing: .2em;
+  font-weight: 700;
+  padding: 3px 13px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+header h1 {
+  font-size: clamp(1.15rem, 5vw, 1.75rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.02em;
+}
+header p { margin-top: 6px; color: #94a3b8; font-size: 12px; }
+
+/* ─── Layout ─── */
+main { max-width: 680px; margin: 0 auto; padding: 0 13px 52px; }
+section { margin-top: 24px; }
+.sec-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .16em;
+  color: var(--slate); text-transform: uppercase;
+  margin-bottom: 11px; padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── Presets ─── */
+.preset-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.preset-btn {
+  flex: 1 1 auto; padding: 10px 8px;
+  border-radius: 10px; border: 1.5px solid var(--blue);
+  background: #fff; color: #2563eb;
+  font-weight: 700; font-size: 12px;
+  cursor: pointer; font-family: inherit;
+  transition: background .15s, color .15s;
+}
+.preset-btn:hover { background: var(--blue); color: #fff; }
+
+/* ─── Box ─── */
+.box {
+  background: #fff; border-radius: 12px;
+  padding: 15px 14px; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ─── Grid ─── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 12px; }
+.g2-flat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.span2 { grid-column: span 2; }
+
+/* ─── Input ─── */
+.ig { display: flex; flex-direction: column; }
+.ig label, .emp-input-label {
+  font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+}
+.emp-input-label.target { color: var(--orange); }
+.hint { font-size: 10px; color: #94a3b8; margin-bottom: 5px; line-height: 1.4; }
+.irow { display: flex; align-items: center; gap: 6px; }
+.irow input[type="number"] {
+  flex: 1; padding: 11px 12px;
+  border-radius: 9px; border: 1.5px solid var(--border);
+  font-size: 16px; color: var(--navy);
+  background: #fff; font-family: inherit; outline: none;
+  min-width: 0; -webkit-appearance: none;
+  transition: border-color .15s;
+}
+.irow input[type="number"]:focus { border-color: var(--blue); }
+.irow input.err { border-color: var(--red) !important; }
+.iunit { font-size: 13px; color: var(--slate); white-space: nowrap; font-weight: 700; flex-shrink: 0; }
+.ierr { font-size: 10px; color: var(--red); margin-top: 3px; min-height: 14px; }
+
+/* ─── Employee income blocks (縦積み) ─── */
+.emp-block {
+  border-left: 4px solid var(--violet);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.emp-block-inner {
+  background: #fff;
+  padding: 15px 14px;
+  border: 1px solid var(--border);
+  border-left: none;
+  box-shadow: var(--shadow);
+}
+.emp-block-inner.target-block {
+  border-top: none;
+  background: #fff8f5;
+  border-left: none;
+  border-color: #fed7aa;
+}
+
+/* 税内訳（インライン・折りたたみ式） */
+.tax-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; padding: 7px 10px;
+  background: #f8f6ff; border-radius: 8px;
+  cursor: pointer; border: none; width: 100%;
+  font-family: inherit;
+}
+.emp-block-inner.target-block .tax-toggle { background: #fff3ec; }
+.tax-toggle-left { display: flex; align-items: center; gap: 8px; }
+.tax-toggle-label { font-size: 11px; font-weight: 600; color: var(--violet); }
+.emp-block-inner.target-block .tax-toggle-label { color: var(--orange); }
+.tax-toggle-takehome { font-size: 14px; font-weight: 800; color: var(--violet); }
+.emp-block-inner.target-block .tax-toggle-takehome { color: var(--orange); }
+.tax-toggle-rate {
+  font-size: 10px; font-weight: 600; color: #fff;
+  background: var(--violet); padding: 2px 8px; border-radius: 10px;
+}
+.emp-block-inner.target-block .tax-toggle-rate { background: var(--orange); }
+.tax-toggle-arrow { font-size: 12px; color: #94a3b8; transition: transform .2s; }
+.tax-toggle-arrow.open { transform: rotate(180deg); }
+
+.tax-detail {
+  display: none;
+  margin-top: 8px;
+  background: #f8f6ff;
+  border-radius: 8px;
+  padding: 10px 11px;
+  border: 1px solid #ede9fe;
+}
+.emp-block-inner.target-block .tax-detail { background: #fff3ec; border-color: #fed7aa; }
+.tax-detail.show { display: block; }
+.tax-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,.05); }
+.tax-row.indent { padding-left: 12px; }
+.tax-row .tl { font-size: 11px; }
+.tax-row.indent .tl { color: var(--slate); }
+.tax-row:not(.indent) .tl { font-weight: 600; color: var(--navy); }
+.tax-row .tv { font-size: 11px; font-weight: 600; color: var(--slate); }
+.tax-row:not(.indent) .tv { color: var(--navy); }
+
+.emp-divider {
+  height: 1px; background: var(--border); margin: 0;
+}
+
+/* ─── Goal box ─── */
+.goal-box {
+  background: #fff; border-radius: 14px;
+  padding: 16px 14px; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+/* 3ステップ縦積み */
+.goal-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 14px; }
+.goal-step-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #f8fafc; border-radius: 10px; padding: 12px 13px;
+}
+.goal-step-row.req { background: #fff7ed; }
+.gs-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+}
+.goal-step-row.req .gs-num { background: var(--orange); }
+.gs-body { flex: 1; min-width: 0; }
+.gs-label { font-size: 10px; font-weight: 600; color: var(--slate); margin-bottom: 2px; }
+.gs-val {
+  font-size: 20px; font-weight: 800; color: var(--navy);
+  line-height: 1.15; word-break: break-all;
+}
+.gs-val.orange { color: var(--orange); }
+.gs-val.green  { color: var(--green); }
+.gs-val.red    { color: var(--red); }
+.gs-arrow { text-align: center; padding: 3px 0; color: #cbd5e1; font-size: 16px; }
+
+.goal-logic {
+  font-size: 10px; color: #94a3b8; background: #f8fafc;
+  border-radius: 8px; padding: 7px 10px; margin-bottom: 13px; line-height: 1.65;
+}
+.gc-title { font-weight: 700; font-size: 13px; color: var(--navy); margin-bottom: 12px; line-height: 1.5; }
+.gc-title .ok { color: var(--green); }
+.gc-title .ng { color: var(--red); }
+.gc-bars { display: flex; flex-direction: column; gap: 10px; }
+.gc-bar-row { display: flex; align-items: center; gap: 8px; }
+.gc-bar-label { width: 84px; font-size: 10px; font-weight: 600; color: #475569; flex-shrink: 0; }
+.gc-bar-track { flex: 1; height: 28px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
+.gc-bar-fill {
+  height: 100%; border-radius: 8px; min-width: 48px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  display: flex; align-items: center;
+}
+.gc-bar-fill span { color: #fff; font-size: 11px; font-weight: 700; padding-left: 9px; white-space: nowrap; }
+.gc-gap {
+  margin-top: 12px; padding: 11px 12px;
+  background: #fef3c7; border-radius: 10px; border: 1px solid #fcd34d;
+}
+.gc-gap-arrow { font-weight: 800; color: #92400e; font-size: 13px; margin-bottom: 3px; }
+.gc-gap-note { font-size: 11px; color: #78350f; }
+.gc-achieved {
+  margin-top: 12px; padding: 11px 12px;
+  background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;
+  font-size: 13px; font-weight: 700; color: #065f46;
+}
+
+/* ─── Comment banner ─── */
+.banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 13px; border-radius: 10px; margin-bottom: 12px;
+  border: 1px solid rgba(0,0,0,.06); font-size: 13px; line-height: 1.65;
+}
+.banner-icon { font-size: 15px; flex-shrink: 0; }
+
+/* ─── Summary ─── */
+.summary {
+  background: #fff; border-radius: 12px;
+  padding: 14px 14px; margin-bottom: 12px;
+  font-size: 13px; line-height: 1.9;
+  border: 1px solid var(--border);
+}
+.summary p + p { margin-top: 2px; }
+
+/* ─── Result cards ─── */
+.cstack { display: flex; flex-direction: column; gap: 10px; }
+.card {
+  background: #fff; border-radius: 12px;
+  padding: 14px 14px; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.card-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600; color: var(--slate);
+  letter-spacing: .05em; text-transform: uppercase;
+  margin-bottom: 6px; flex-wrap: wrap;
+}
+.card-val { font-weight: 800; letter-spacing: -.02em; line-height: 1; font-size: 22px; }
+.card-sub { font-size: 10px; color: #94a3b8; margin-top: 5px; }
+.badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+/* Repayment */
+.rep-box {
+  background: #fff; border-radius: 12px;
+  padding: 13px 14px; border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.rep-hd {
+  font-size: 10px; font-weight: 700; color: var(--slate);
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px;
+}
+.rep-item { background: #f8fafc; border-radius: 8px; padding: 10px 11px; }
+.rep-item-label { font-size: 11px; color: var(--slate); font-weight: 600; display: block; margin-bottom: 3px; }
+.rep-item-val { font-size: 16px; font-weight: 800; color: var(--navy); }
+.rep-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0 0; margin-top: 7px; border-top: 1.5px solid var(--border);
+}
+.rep-total-label { font-size: 13px; font-weight: 700; }
+.rep-total-val { font-size: 20px; font-weight: 800; color: var(--amber); }
+
+/* Emp comparison */
+.emp-comp {
+  margin-top: 11px; background: #f3effefe;
+  border-radius: 8px; padding: 10px 11px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ec-row {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: #5b21b6; flex-wrap: wrap; gap: 2px;
+}
+.ec-row.total { border-top: 1px solid #ede9fe; padding-top: 6px; margin-top: 2px; }
+
+/* ─── Bar chart ─── */
+.chart-wrap {
+  background: #fff; border-radius: 12px;
+  padding: 14px 14px; border: 1px solid var(--border);
+  box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 11px;
+}
+.b-row { display: flex; align-items: center; gap: 8px; }
+.b-lbl { width: 84px; font-size: 10px; font-weight: 600; color: #475569; flex-shrink: 0; }
+.b-track { flex: 1; height: 11px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+.b-fill { height: 100%; border-radius: 6px; transition: width .45s ease; }
+.b-val { width: 64px; font-size: 11px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+/* ─── Misc ─── */
+.err-bnr {
+  margin-top: 12px; padding: 11px 13px; border-radius: 10px;
+  background: #fff1f2; color: #be123c;
+  font-size: 13px; font-weight: 600; border: 1px solid #fecdd3;
+}
+footer { margin-top: 32px; }
+.disc {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 13px;
+  font-size: 10px; color: var(--slate); line-height: 1.75;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.result-section { animation: fadeUp .3s ease; }
+</style>
 </head>
 <body>
-  <h1>公開できました</h1>
-  <p>GitHub Pagesのテストページです。</p>
+
+<header>
+  <div class="h-badge">DENTAL CLINIC SIMULATOR</div>
+  <h1>手取り収入シミュレーター</h1>
+  <p>開業後の最終手残り・勤務医比較・目標達成年商を自動試算</p>
+</header>
+
+<main>
+
+  <!-- プリセット -->
+  <section>
+    <div class="sec-title">おすすめ開業ケース</div>
+    <div class="preset-row">
+      <button class="preset-btn" onclick="applyPreset(0)">1億円 開業</button>
+      <button class="preset-btn" onclick="applyPreset(1)">1.2億円 開業</button>
+      <button class="preset-btn" onclick="applyPreset(2)">1.5億円 開業</button>
+    </div>
+  </section>
+
+  <!-- 勤務医年収：縦積み -->
+  <section>
+    <div class="sec-title">勤務医の年収設定</div>
+    <div class="emp-block">
+
+      <!-- 現在の勤務医年収 -->
+      <div class="emp-block-inner">
+        <div class="emp-input-label">現在の勤務医 額面年収</div>
+        <div class="hint">現在の年収を入力すると所得税・住民税・社会保険を自動計算します</div>
+        <div class="irow">
+          <input type="number" id="empCurrent" value="1500" min="1" step="50" oninput="calc()">
+          <span class="iunit">万円</span>
+        </div>
+        <div class="ierr" id="err_empCurrent"></div>
+        <!-- 手取りサマリー + 展開ボタン -->
+        <button class="tax-toggle" onclick="toggleTax('current')" id="toggle-current">
+          <div class="tax-toggle-left">
+            <span class="tax-toggle-label">手取り年収</span>
+            <span class="tax-toggle-takehome" id="tc-takehome">－</span>
+            <span class="tax-toggle-rate" id="tc-rate">－</span>
+          </div>
+          <span class="tax-toggle-arrow" id="arrow-current">▼</span>
+        </button>
+        <div class="tax-detail" id="tax-detail-current"></div>
+      </div>
+
+      <div class="emp-divider"></div>
+
+      <!-- 目標勤務医年収 -->
+      <div class="emp-block-inner target-block">
+        <div class="emp-input-label target">目標 勤務医換算 額面年収</div>
+        <div class="hint">開業後に実現したい手残りを、勤務医の額面年収で設定してください</div>
+        <div class="irow">
+          <input type="number" id="empTarget" value="3000" min="1" step="50" oninput="calc()">
+          <span class="iunit">万円</span>
+        </div>
+        <div class="ierr" id="err_empTarget"></div>
+        <!-- 手取りサマリー + 展開ボタン -->
+        <button class="tax-toggle" onclick="toggleTax('target')" id="toggle-target">
+          <div class="tax-toggle-left">
+            <span class="tax-toggle-label">手取り年収</span>
+            <span class="tax-toggle-takehome" id="tt-takehome">－</span>
+            <span class="tax-toggle-rate" id="tt-rate">－</span>
+          </div>
+          <span class="tax-toggle-arrow" id="arrow-target">▼</span>
+        </button>
+        <div class="tax-detail" id="tax-detail-target"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 借入条件 -->
+  <section>
+    <div class="sec-title">借入条件</div>
+    <div class="g2">
+      <div class="ig">
+        <label>公庫 借入額</label>
+        <div class="irow"><input type="number" id="kokoPrincipal" value="7200" min="0" step="100" oninput="calc()"><span class="iunit">万円</span></div>
+        <div class="ierr" id="err_kokoPrincipal"></div>
+      </div>
+      <div class="ig">
+        <label>公庫 金利（年利）</label>
+        <div class="irow"><input type="number" id="kokoRate" value="2.6" min="0" max="20" step="0.1" oninput="calc()"><span class="iunit">%</span></div>
+        <div class="ierr" id="err_kokoRate"></div>
+      </div>
+      <div class="ig">
+        <label>公庫 返済年数</label>
+        <div class="irow"><input type="number" id="kokoYears" value="20" min="1" max="35" step="1" oninput="calc()"><span class="iunit">年</span></div>
+        <div class="ierr" id="err_kokoYears"></div>
+      </div>
+      <div></div>
+      <div class="ig">
+        <label>銀行 借入額</label>
+        <div class="irow"><input type="number" id="bankPrincipal" value="2800" min="0" step="100" oninput="calc()"><span class="iunit">万円</span></div>
+        <div class="ierr" id="err_bankPrincipal"></div>
+      </div>
+      <div class="ig">
+        <label>銀行 金利（年利）</label>
+        <div class="irow"><input type="number" id="bankRate" value="2.0" min="0" max="20" step="0.1" oninput="calc()"><span class="iunit">%</span></div>
+        <div class="ierr" id="err_bankRate"></div>
+      </div>
+      <div class="ig">
+        <label>銀行 返済年数</label>
+        <div class="irow"><input type="number" id="bankYears" value="15" min="1" max="35" step="1" oninput="calc()"><span class="iunit">年</span></div>
+        <div class="ierr" id="err_bankYears"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 収益条件 -->
+  <section>
+    <div class="sec-title">収益条件</div>
+    <div class="g2">
+      <div class="ig">
+        <label>年商</label>
+        <div class="irow"><input type="number" id="revenue" value="10000" min="1" step="100" oninput="calc()"><span class="iunit">万円</span></div>
+        <div class="ierr" id="err_revenue"></div>
+      </div>
+      <div class="ig">
+        <label>利益率（借入返済前）</label>
+        <div class="hint">目安：15〜25%</div>
+        <div class="irow"><input type="number" id="profitRate" value="20" min="0" max="100" step="1" oninput="calc()"><span class="iunit">%</span></div>
+        <div class="ierr" id="err_profitRate"></div>
+      </div>
+      <div class="ig span2">
+        <label>税引後手残り率（開業医）</label>
+        <div class="hint">所得税・住民税等控除後。個人開業目安：65〜75%。法人化で変動あり</div>
+        <div class="irow"><input type="number" id="netRate" value="70" min="0" max="100" step="1" oninput="calc()"><span class="iunit">%</span></div>
+        <div class="ierr" id="err_netRate"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="err-bnr" id="err-banner" style="display:none">⚠ 入力内容にエラーがあります。各項目をご確認ください。</div>
+
+  <!-- 結果エリア -->
+  <div id="results" style="display:none">
+
+    <!-- 目標達成シミュレーション -->
+    <section class="result-section">
+      <div class="sec-title">🎯 目標達成シミュレーション</div>
+      <div class="goal-box">
+        <div class="goal-steps">
+          <div class="goal-step-row">
+            <div class="gs-num">1</div>
+            <div class="gs-body">
+              <div class="gs-label">目標 勤務医換算（額面）</div>
+              <div class="gs-val orange" id="gh-target-gross">－</div>
+            </div>
+          </div>
+          <div class="gs-arrow">↓</div>
+          <div class="goal-step-row">
+            <div class="gs-num">2</div>
+            <div class="gs-body">
+              <div class="gs-label">その額面の手取り年収（自動計算）</div>
+              <div class="gs-val orange" id="gh-target-takehome">－</div>
+            </div>
+          </div>
+          <div class="gs-arrow">↓</div>
+          <div class="goal-step-row req">
+            <div class="gs-num">3</div>
+            <div class="gs-body">
+              <div class="gs-label">開業でこの手残りを得るために必要な年商</div>
+              <div class="gs-val" id="gh-req-rev">－</div>
+            </div>
+          </div>
+        </div>
+        <div class="goal-logic" id="goal-logic-text"></div>
+        <div class="gc-title" id="gc-title"></div>
+        <div class="gc-bars">
+          <div class="gc-bar-row">
+            <div class="gc-bar-label">現在の年商</div>
+            <div class="gc-bar-track">
+              <div class="gc-bar-fill" id="gc-bar-current" style="background:#6366f1">
+                <span id="gc-bar-current-val"></span>
+              </div>
+            </div>
+          </div>
+          <div class="gc-bar-row">
+            <div class="gc-bar-label">目標達成に必要</div>
+            <div class="gc-bar-track">
+              <div class="gc-bar-fill" id="gc-bar-req" style="background:#f59e0b">
+                <span id="gc-bar-req-val"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="gc-gap-box"></div>
+      </div>
+    </section>
+
+    <!-- 現状試算 -->
+    <section class="result-section" style="margin-top:24px">
+      <div class="sec-title">現在の年商での試算結果</div>
+      <div class="banner" id="comment-banner">
+        <span class="banner-icon" id="banner-icon"></span>
+        <span id="banner-text"></span>
+      </div>
+      <div class="summary" id="summary-text"></div>
+
+      <div class="cstack">
+        <div class="g2-flat">
+          <div class="card" style="border-left:4px solid #3b82f6">
+            <div class="card-label">年間利益額 <span class="badge" style="background:#3b82f622;color:#3b82f6">借入返済前</span></div>
+            <div class="card-val" style="color:#3b82f6" id="res-profit"></div>
+          </div>
+          <div class="card" style="border-left:4px solid #6366f1">
+            <div class="card-label">税引後手取り見込み</div>
+            <div class="card-val" style="color:#6366f1" id="res-net"></div>
+          </div>
+        </div>
+
+        <div class="rep-box">
+          <div class="rep-hd">年間返済額 内訳</div>
+          <div class="g2-flat">
+            <div class="rep-item">
+              <span class="rep-item-label">公庫 年間返済額</span>
+              <span class="rep-item-val" id="res-koko"></span>
+            </div>
+            <div class="rep-item">
+              <span class="rep-item-label">銀行 年間返済額</span>
+              <span class="rep-item-val" id="res-bank"></span>
+            </div>
+          </div>
+          <div class="rep-total">
+            <span class="rep-total-label">総年間返済額</span>
+            <span class="rep-total-val" id="res-total-repay"></span>
+          </div>
+        </div>
+
+        <div class="card" id="card-final" style="border-left:4px solid #10b981">
+          <div class="card-label">最終手残り（返済後）</div>
+          <div class="card-val" id="res-final" style="font-size:28px"></div>
+          <div class="card-sub" id="res-final-sub"></div>
+        </div>
+
+        <div class="card" style="border-left:4px solid #8b5cf6;background:#faf5ff">
+          <div class="card-label">
+            現在の年商での 勤務医換算
+            <span class="badge" style="background:#8b5cf620;color:#8b5cf6">自動計算</span>
+          </div>
+          <div class="card-val" style="color:#8b5cf6;font-size:26px" id="res-emp-equiv"></div>
+          <div class="card-sub" id="res-emp-equiv-sub"></div>
+          <div class="emp-comp" id="emp-comp"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 棒グラフ -->
+    <section class="result-section" style="margin-top:24px">
+      <div class="sec-title">収支比較グラフ</div>
+      <div class="chart-wrap" id="bar-chart"></div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="disc">
+      ⚠ 本シミュレーターは元利均等返済・公的な税率テーブルによる簡易計算です。所得税は2024年度の超過累進税率（復興特別所得税2.1%含む）、住民税は一律10%（均等割5,000円含む）、社会保険は協会けんぽ（東京・2024年度）を使用。実際の返済条件・各種控除・扶養状況・法人化の有無・元金据置・減価償却などにより結果は変動します。本結果は投資助言・税務アドバイスではなく、概算の参考情報としてご利用ください。
+    </div>
+  </footer>
+
+</main>
+
+<script>
+// ─── プリセット ───────────────────────────────────────────
+const PRESETS = [
+  { kokoPrincipal:7200, kokoRate:2.6, kokoYears:20, bankPrincipal:2800, bankRate:2.0, bankYears:15, revenue:10000, profitRate:20, netRate:70, empCurrent:1500, empTarget:3000 },
+  { kokoPrincipal:8400, kokoRate:2.6, kokoYears:20, bankPrincipal:3600, bankRate:2.0, bankYears:15, revenue:12000, profitRate:20, netRate:70, empCurrent:1500, empTarget:3000 },
+  { kokoPrincipal:10500,kokoRate:2.6, kokoYears:20, bankPrincipal:4500, bankRate:2.0, bankYears:15, revenue:13000, profitRate:20, netRate:70, empCurrent:1500, empTarget:3000 },
+];
+function applyPreset(i) {
+  Object.entries(PRESETS[i]).forEach(([k,v])=>{ const el=document.getElementById(k); if(el) el.value=v; });
+  calc();
+}
+
+// ─── 税計算 ───────────────────────────────────────────────
+const BASIC_DED = 480000;
+function salDed(g) {
+  if(g<=1625000)  return 550000;
+  if(g<=1800000)  return Math.floor(g*.4)-100000;
+  if(g<=3600000)  return Math.floor(g*.3)+80000;
+  if(g<=6600000)  return Math.floor(g*.2)+440000;
+  if(g<=8500000)  return Math.floor(g*.1)+1100000;
+  return 1950000;
+}
+function socialIns(g) {
+  const mo=g/12;
+  const h=Math.min(mo,1390000)*.0998*.5*12;
+  const p=Math.min(mo,650000)*.183*.5*12;
+  const e=g*.006;
+  return {total:h+p+e,h,p,e};
+}
+function incTax(t) {
+  if(t<=0) return 0;
+  const B=[[1950000,.05,0],[3300000,.10,97500],[6950000,.20,427500],
+           [9000000,.23,636000],[18000000,.33,1536000],[40000000,.40,2796000],[Infinity,.45,4796000]];
+  const [,r,d]=B.find(([l])=>t<=l);
+  return Math.max((t*r-d)*1.021,0);
+}
+function resTax(t) { return t>0?t*.10+5000:5000; }
+function empCalc(grossYen) {
+  if(!grossYen||grossYen<=0) return null;
+  const sd=salDed(grossYen), si=socialIns(grossYen);
+  const taxable=Math.max(grossYen-sd-si.total-BASIC_DED,0);
+  const it=incTax(taxable), rt=resTax(taxable);
+  const totalDed=si.total+it+rt, th=grossYen-totalDed;
+  return {th, it, rt, si, totalDed, rate:th/grossYen, sd, taxable};
+}
+
+// ─── 開業計算 ──────────────────────────────────────────────
+function annPay(p,r,y) {
+  if(!p||p<=0||y<=0) return 0;
+  if(!r||r<=0) return p/y;
+  const mr=r/100/12, n=y*12;
+  return (p*mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1)*12;
+}
+
+// ─── フォーマット ──────────────────────────────────────────
+function fmtM(yen,d=0) {
+  if(!isFinite(yen)) return '－';
+  return (yen/10000).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g,',')+' 万円';
+}
+function fmtA(yen) {
+  if(!isFinite(yen)) return '－';
+  const m=Math.round(yen/10000);
+  return Math.abs(m)>=10000?(m/10000).toFixed(2)+'億円':m.toLocaleString()+' 万円';
+}
+function fmtP(v) { return (v*100).toFixed(1)+'%'; }
+function gv(id) { return parseFloat(document.getElementById(id).value)||0; }
+
+// ─── バリデーション ────────────────────────────────────────
+function setErr(id,msg) {
+  const e=document.getElementById('err_'+id);
+  if(e){ e.textContent=msg; document.getElementById(id).classList.toggle('err',!!msg); }
+}
+function validateAll() {
+  let ok=true;
+  const checks=[
+    ['kokoPrincipal',v=>v>=0,'0以上を入力'],
+    ['bankPrincipal',v=>v>=0,'0以上を入力'],
+    ['kokoRate',v=>v>=0&&v<=20,'0〜20%で入力'],
+    ['bankRate',v=>v>=0&&v<=20,'0〜20%で入力'],
+    ['kokoYears',v=>v>=1&&v<=35,'1〜35年で入力'],
+    ['bankYears',v=>v>=1&&v<=35,'1〜35年で入力'],
+    ['revenue',v=>v>0,'1以上を入力'],
+    ['profitRate',v=>v>=0&&v<=100,'0〜100で入力'],
+    ['netRate',v=>v>=0&&v<=100,'0〜100で入力'],
+    ['empCurrent',v=>v>0,'1以上を入力'],
+    ['empTarget',v=>v>0,'1以上を入力'],
+  ];
+  checks.forEach(([id,fn,msg])=>{ const v=gv(id); const valid=fn(v); setErr(id,valid?'':msg); if(!valid) ok=false; });
+  return ok;
+}
+
+// ─── 税内訳HTML生成 ────────────────────────────────────────
+function taxDetailHTML(c, gross) {
+  return `
+  <div class="tax-row"><span class="tl">額面</span><span class="tv">${fmtM(gross)}</span></div>
+  <div class="tax-row indent"><span class="tl">給与所得控除</span><span class="tv">▲${fmtM(c.sd)}</span></div>
+  <div class="tax-row indent"><span class="tl">社会保険料 計</span><span class="tv">▲${fmtM(c.si.total)}</span></div>
+  <div class="tax-row indent"><span class="tl">　└ 健康保険</span><span class="tv">▲${fmtM(c.si.h)}</span></div>
+  <div class="tax-row indent"><span class="tl">　└ 厚生年金</span><span class="tv">▲${fmtM(c.si.p)}</span></div>
+  <div class="tax-row indent"><span class="tl">　└ 雇用保険</span><span class="tv">▲${fmtM(c.si.e)}</span></div>
+  <div class="tax-row"><span class="tl">課税所得</span><span class="tv">${fmtM(c.taxable)}</span></div>
+  <div class="tax-row indent"><span class="tl">所得税（復興税含）</span><span class="tv">▲${fmtM(c.it)}</span></div>
+  <div class="tax-row indent"><span class="tl">住民税</span><span class="tv">▲${fmtM(c.rt)}</span></div>
+  <div class="tax-row"><span class="tl">控除合計</span><span class="tv">▲${fmtM(c.totalDed)}</span></div>`;
+}
+
+// ─── 折りたたみトグル ──────────────────────────────────────
+function toggleTax(which) {
+  const detail = document.getElementById('tax-detail-'+which);
+  const arrow  = document.getElementById('arrow-'+which);
+  const isOpen = detail.classList.contains('show');
+  detail.classList.toggle('show', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+  arrow.textContent = isOpen ? '▼' : '▲';
+}
+
+// ─── メイン計算 ────────────────────────────────────────────
+function calc() {
+  const ok = validateAll();
+  document.getElementById('err-banner').style.display = ok?'none':'block';
+
+  // 勤務医税計算（常時）
+  const gCurrent = gv('empCurrent')*10000;
+  const gTarget  = gv('empTarget')*10000;
+  const eC = empCalc(gCurrent);
+  const eT = empCalc(gTarget);
+
+  if(eC) {
+    document.getElementById('tc-takehome').textContent = fmtM(eC.th);
+    document.getElementById('tc-rate').textContent     = '手取り率 '+fmtP(eC.rate);
+    document.getElementById('tax-detail-current').innerHTML = taxDetailHTML(eC, gCurrent);
+  }
+  if(eT) {
+    document.getElementById('tt-takehome').textContent = fmtM(eT.th);
+    document.getElementById('tt-rate').textContent     = '手取り率 '+fmtP(eT.rate);
+    document.getElementById('tax-detail-target').innerHTML  = taxDetailHTML(eT, gTarget);
+  }
+
+  if(!ok||!eC||!eT) { document.getElementById('results').style.display='none'; return; }
+
+  // 開業計算
+  const M=10000;
+  const kokoAnnual = annPay(gv('kokoPrincipal')*M, gv('kokoRate'), gv('kokoYears'));
+  const bankAnnual = annPay(gv('bankPrincipal')*M, gv('bankRate'), gv('bankYears'));
+  const totalRepay = kokoAnnual+bankAnnual;
+  const revenue    = gv('revenue')*M;
+  const pRate      = gv('profitRate');
+  const nRate      = gv('netRate');
+  const profit     = revenue*(pRate/100);
+  const netInc     = profit*(nRate/100);
+  const finalTH    = netInc-totalRepay;
+  const empEquiv   = eC.rate>0 ? finalTH/eC.rate : 0;
+
+  // 必要年商
+  const denom  = (pRate/100)*(nRate/100);
+  const reqRev = denom ? (eT.th+totalRepay)/denom : 0;
+
+  // ── 目標チャート ──
+  document.getElementById('gh-target-gross').textContent    = fmtA(gTarget);
+  document.getElementById('gh-target-takehome').textContent = fmtM(eT.th);
+  const reqEl = document.getElementById('gh-req-rev');
+  reqEl.textContent = fmtA(reqRev);
+  reqEl.className   = 'gs-val '+(revenue>=reqRev?'green':'red');
+
+  document.getElementById('goal-logic-text').textContent =
+    '必要年商 ＝（目標手取り '+fmtM(eT.th)+' ＋ 年間返済 '+fmtM(totalRepay)+'）÷（利益率 '+pRate+'% × 手残り率 '+nRate+'%）';
+
+  const gcMax  = Math.max(reqRev,revenue)*1.15;
+  const curPct = Math.min(revenue/gcMax*100,100);
+  const reqPct = Math.min(reqRev/gcMax*100,100);
+  const achieved = revenue>=reqRev;
+
+  document.getElementById('gc-bar-current').style.width = curPct+'%';
+  document.getElementById('gc-bar-current-val').textContent = fmtA(revenue);
+  document.getElementById('gc-bar-req').style.width     = reqPct+'%';
+  document.getElementById('gc-bar-req').style.background = achieved?'#10b981':'#f59e0b';
+  document.getElementById('gc-bar-req-val').textContent = fmtA(reqRev);
+
+  if(achieved) {
+    document.getElementById('gc-title').innerHTML = '<span class="ok">✅ 現在の年商で目標を達成できています！</span>';
+    document.getElementById('gc-gap-box').innerHTML = '<div class="gc-achieved">🎉 目標の手取り '+fmtM(eT.th)+' を上回る手残りが見込めます。</div>';
+  } else {
+    const gap=reqRev-revenue;
+    document.getElementById('gc-title').innerHTML = '目標達成まで <strong class="ng">あと '+fmtA(gap)+'</strong> の年商アップが必要です';
+    document.getElementById('gc-gap-box').innerHTML =
+      '<div class="gc-gap"><div class="gc-gap-arrow">↑ '+fmtA(gap)+' 増やす必要あり</div><div class="gc-gap-note">月商換算で <strong>'+fmtM(gap/12,1)+'</strong> のアップが目標です</div></div>';
+  }
+
+  // ── コメント ──
+  let bg,icon,text;
+  if(finalTH<0)            {bg='#fff1f2';icon='🔴';text='返済額が手取りを上回っています。資金計画の抜本的な見直しをご検討ください。';}
+  else if(finalTH<7000000) {bg='#fffbeb';icon='🟡';text='開業後の自由度はかなり低めです。生活防衛資金の確保を最優先に。';}
+  else if(finalTH<12000000){bg='#eff6ff';icon='🔵';text='一定の手残りはありますが、余裕は限定的です。追加収益の確保が鍵です。';}
+  else                     {bg='#f0fdf4';icon='🟢';text='返済後も比較的安定した手残りが見込めます。計画通り運営できれば十分な余裕があります。';}
+  const ban=document.getElementById('comment-banner');
+  ban.style.background=bg;
+  document.getElementById('banner-icon').textContent=icon;
+  document.getElementById('banner-text').textContent=text;
+
+  // ── サマリー ──
+  document.getElementById('summary-text').innerHTML =
+    '<p>年商 <strong>'+fmtA(revenue)+'</strong> での最終手残りは約 <strong>'+fmtA(finalTH)+'</strong> です。</p>'
+    +'<p>現在の実効手取り率（'+fmtP(eC.rate)+'）で換算すると、<strong>勤務医 額面 '+fmtA(empEquiv)+'</strong> 相当です。</p>'
+    +'<p style="color:#7c3aed;margin-top:4px">目標の額面 <strong>'+fmtA(gTarget)+'</strong>（手取り '+fmtM(eT.th)+'）を開業で実現するには年商 <strong>'+fmtA(reqRev)+'</strong> が必要です。</p>';
+
+  // ── 結果カード ──
+  document.getElementById('res-profit').textContent = fmtA(profit);
+  document.getElementById('res-net').textContent    = fmtA(netInc);
+  document.getElementById('res-koko').textContent   = fmtA(kokoAnnual);
+  document.getElementById('res-bank').textContent   = fmtA(bankAnnual);
+  document.getElementById('res-total-repay').textContent = fmtA(totalRepay);
+
+  const fc = finalTH>=12000000?'#10b981':finalTH>=7000000?'#f59e0b':'#ef4444';
+  document.getElementById('card-final').style.borderLeft='4px solid '+fc;
+  const rf=document.getElementById('res-final');
+  rf.textContent=fmtA(finalTH); rf.style.color=fc;
+  document.getElementById('res-final-sub').textContent='税引後手取り '+fmtA(netInc)+' ー 年間返済 '+fmtA(totalRepay);
+
+  document.getElementById('res-emp-equiv').textContent   = fmtA(empEquiv);
+  document.getElementById('res-emp-equiv-sub').textContent = fmtA(finalTH)+' ÷ 実効手取り率 '+fmtP(eC.rate);
+
+  const diff=empEquiv-gCurrent, isUp=diff>=0;
+  document.getElementById('emp-comp').innerHTML =
+    '<div class="ec-row"><span>現在の勤務医年収</span><strong>'+fmtA(gCurrent)+'</strong></div>'
+    +'<div class="ec-row"><span>開業換算年収</span><strong>'+fmtA(empEquiv)+'</strong></div>'
+    +'<div class="ec-row total"><span>差額</span><strong style="color:'+(isUp?'#059669':'#dc2626')+'">'+
+    (isUp?'+':'')+fmtA(diff)+' '+(isUp?'🟢 開業優位':'🔴 勤務医優位')+'</strong></div>';
+
+  // ── 棒グラフ ──
+  const chartData=[
+    {l:'年間利益額',v:profit,c:'#3b82f6'},
+    {l:'税引後手取り',v:netInc,c:'#6366f1'},
+    {l:'年間返済額',v:totalRepay,c:'#f59e0b'},
+    {l:'最終手残り',v:finalTH,c:finalTH>=0?'#10b981':'#ef4444'},
+  ];
+  const maxV=Math.max(...chartData.map(d=>Math.abs(d.v)),1);
+  document.getElementById('bar-chart').innerHTML = chartData.map(d=>{
+    const pct=Math.min(Math.abs(d.v)/maxV,1)*100;
+    const neg=d.v<0;
+    return '<div class="b-row"><div class="b-lbl">'+d.l+'</div>'
+      +'<div class="b-track"><div class="b-fill" style="width:'+pct+'%;background:'+(neg?'#ef4444':d.c)+'"></div></div>'
+      +'<div class="b-val" style="color:'+(neg?'#ef4444':'#1a2540')+'">'+fmtM(d.v)+'</div></div>';
+  }).join('');
+
+  document.getElementById('results').style.display='block';
+}
+
+calc();
+</script>
 </body>
 </html>
